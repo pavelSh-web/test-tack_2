@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+    
+    <section class="photo">
+        <div class="photo-inner">
+            <div class="photo-head">
+                <div class="container">
+                    <h1 class="photo-title animate__fadeInDown">Заголовок</h1>
+                    <h3 class="photo-subtitle animate__fadeInDown">Подзаголовок</h3>
+                    <p class="photo-desc animate__fadeInDown">Мощный дрон с записью 4K видео, мощной батареей и продвинутым автопилотом.</p>
+                </div>
+            </div>
+        </div>
+        <gallery></gallery>
+    </section>
+    
+    
+    <script src="//gnjo.github.io/riot.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/tags/gallery.tag" type="riot/tag"></script>
+    
+    <script>
+        riot.compile('assets/tags/gallery.tag', function () {
+            riot.mount('gallery');
+        })
+    </script>
+</body>
+</html>
