@@ -37,8 +37,6 @@ body {
 }
 
 .photo {
-    position: relative;
-    
     &-head {
         padding: 100px 0 50px;
         position: fixed;
@@ -49,6 +47,18 @@ body {
         background: #E4E4E4;
         text-align: center;
         z-index: 10000;
+    }
+
+    &-head.unfixed {
+        position: absolute;
+    }
+
+    &-head.unfixed .photo-desc{
+        display: block;
+    }
+
+    &-head.unfixed .photo-subtitle{
+        display: none;
     }
 
     &-title {

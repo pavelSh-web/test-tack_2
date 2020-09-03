@@ -9,18 +9,68 @@
         </div>
     </div>
     <script>
-        const resultObj = {
-            gallery: [[],[],[]]
+
+        //Стартовый шаблон основной сетки
+        let resultObj = {};
+        if (document.body.clientWidth <= 600) {
+            resultObj = {
+                gallery: [[]]
+            }
+        } else {
+            resultObj = {
+                gallery: [[], [], []]
+            }
         }
-
         this.gallery = resultObj.gallery;
-        const tagElem = this.root;
 
+        const tagElem = this.root;
+        //url запроса
         let clientId = 'fVktfCz87cJUOPqt1n8TE2LVqWNRpCNIupj9frxQsiY';
-        const query = ['drone view', 'sea', 'summer', 'nature', 'mountain', 'travel', 'tourism', 'lake'];
+        const query = ['drone view', 'sea', 'summer', 'nature', 'sky', 'mountain', 'travel', 'tourism', 'lake'];
         let url = 'https://api.unsplash.com/search/photos/?client_id=' +
         clientId + '&query='; 
 
+        //Добавление класса, отменяющего 'position: fixed' у элемента .photo-head
+        if (screen.width > 600 && (screen.width <= 600 || screen.height <= 600)) {
+            document.querySelector('.photo-head').classList.add('unfixed');
+        }
+
+        //Функция изменений при повороте тач-устройства
+        const doOnOrientationChange = () => {
+            const results = [];
+            if (window.orientation == -90 || window.orientation == 90) {
+                if (screen.width > 600 && (screen.width <= 600 || screen.height <= 600)) {
+                    document.querySelector('.photo-head').classList.add('unfixed');
+                    const j = resultObj.gallery[0].length / 3;
+                    for (let i = 0; i < resultObj.gallery[0].length; i += j)
+                        results.push(resultObj.gallery[0].slice(i, i + j));
+                    resultObj.gallery = results;
+                } else {
+                    document.querySelector('.photo-head').classList.remove('unfixed');
+                }
+            } else {
+                document.querySelector('.photo-head').classList.remove('unfixed');
+                if (screen.width <= 600) {
+                    resultObj.gallery.forEach(arr => {
+                        arr.forEach(item => {
+                            results.push(item)
+                        })
+                    });
+                    resultObj.gallery = [];
+                    resultObj.gallery[0] = results;
+                }
+            }
+            this.gallery = resultObj.gallery;
+            new Blazy({
+                            offset: -200
+                        });
+            riot.update();
+        }
+        window.addEventListener('orientationchange', doOnOrientationChange);
+        
+
+
+        //Функция запрашивает фотографии и формирует их в сетку
         const getPhoto = (url) => {
             //Шаблон сетки
             let gridArr = [
@@ -28,12 +78,14 @@
                 [{ size: "s" }, { size: "l" }, { size: "xs" }],
                 [{ size: "l" }, { size: "xs" }, { size: "s" }],
             ];
+
             //Рандомный url
             url += query[Math.floor(Math.random() * query.length)];
             
             //Запускаем лоадер
             tagElem.classList.add('loading');
 
+            
             fetch(url)  
                 .then((response) => {
                     
@@ -44,47 +96,88 @@
                     }
 
                     response.json().then((data) => {
+                        //Счетчик для фотографий
                         let count = 0;
-                        resultObj.gallery.forEach(gridCol => {
-                            //Рандомный столбец сетки
-                            const randomI = Math.floor(Math.random() * gridArr.length)
-                            //Массив для предварительного заполнения
-                            const fillGrid = gridArr[randomI];
-                            gridArr.splice(randomI, 1);
-                            //Заполнение каждого элемента столбца
-                            for( let j = 0; j < 3; j++ ) {
-                                fillGrid[j].src = data.results[count].urls.regular;
-                                fillGrid[j].color = data.results[count].color;
-                                count++
-                            }
-                            //Пушим созданную колонку
-                            fillGrid.forEach((item) => gridCol.push(item));
-                        });
+
+                        //Массив для предварительного заполнения
+                        let fillGrid = [];
+
+                        if (document.body.clientWidth <= 600) {
+
+                            resultObj.gallery.forEach(gridCol => {
+                                for ( let i = 0; i < 3; i++) {
+                                    //Рандомный индекс для gridArr
+                                    const randomI = Math.floor(Math.random() * gridArr.length);
+                                    //Заполнение каждого элемента столбца
+                                    for( let j = 0; j < 3; j++ ) {
+                                        gridArr[randomI][j].src = data.results[count].urls.regular;
+                                        gridArr[randomI][j].color = data.results[count].color;
+                                        count++
+                                    }
+                                    fillGrid = fillGrid.concat(gridArr[randomI]);
+                                    gridArr.splice(randomI, 1);
+                                }
+
+                                //Заполняем текущую колонку
+                                fillGrid.forEach((item) => {
+                                    gridCol.push(item);
+                                });
+                            });
+                           
+                        } else {
+
+                            resultObj.gallery.forEach((gridCol) => {
+                                //Рандомный столбец сетки
+                                const randomI = Math.floor(Math.random() * gridArr.length)
+                                
+                                fillGrid = gridArr[randomI];
+                                gridArr.splice(randomI, 1);
+
+                                //Заполнение каждого элемента столбца
+                                for( let j = 0; j < 3; j++ ) {
+                                    fillGrid[j].src = data.results[count].urls.regular;
+                                    fillGrid[j].color = data.results[count].color;
+                                    count++
+                                }
+
+                                //Заполняем колонку
+                                fillGrid.forEach((item) => {
+                                    gridCol.push(item);
+                                });
+                            });
+                            
+                        }
+                    
                         riot.update();
+                        
                         //Отключаем лоадер
                         tagElem.classList.remove('loading');
                         //Запускаем ленивую загрузку
-                        var blazy = new Blazy({
+                        new Blazy({
                             offset: -200
                         });
                     });  
                 })
-                .catch(function(err) {  
+                .catch((err) => {  
                     console.log('Fetch Error :-S', err);  
                 });
         }
-
         getPhoto(url);
 
-        //Добаляем верхний отступ у gallery
-        function elementSize(selector) {
-            const element = document.querySelector(selector);
-            return element.clientHeight;
+        //Функция добавляет верхний отступ у gallery
+        function addMargin() {
+            function elementSize(selector) {
+                const element = document.querySelector(selector);
+                return element.clientHeight;
+            }
+            document.querySelector('gallery').style.marginTop = elementSize('.photo-head') + 'px';
         }
-        document.querySelector('gallery').style.marginTop = elementSize('.photo-head') + 'px';
+        addMargin();
+        window.addEventListener('resize', () => addMargin())
 
 
-        //Отслеживание конца страницы
+
+        //Отслеживание конца страницы и отправка нового запроса
         window.addEventListener('scroll',() => {
             const clientHeight = document.documentElement.clientHeight ? document.documentElement.clientHeight : document.body.clientHeight;
             const documentHeight = document.documentElement.scrollHeight ? document.documentElement.scrollHeight : document.body.scrollHeight;
