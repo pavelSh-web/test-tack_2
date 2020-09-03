@@ -185,7 +185,7 @@
             const documentHeight = document.documentElement.scrollHeight ? document.documentElement.scrollHeight : document.body.scrollHeight;
             const scrollTop = window.pageYOffset ? window.pageYOffset : (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
 
-            if((documentHeight - clientHeight) <= scrollTop) {
+            if((documentHeight - clientHeight) <= scrollTop + 10) {
                 getPhoto(url);
             }
         });
