@@ -31,7 +31,7 @@
         clientId + '&query='; 
 
         //Добавление класса, отменяющего 'position: fixed' у элемента .photo-head
-        if (screen.height <= 600) {
+        if (screen.height <= 550) {
             document.querySelector('.photo-head').classList.add('unfixed');
         }
 
@@ -39,8 +39,10 @@
         const doOnOrientationChange = () => {
             const results = [];
             if (window.orientation == -90 || window.orientation == 90) {
-                if (screen.width > 600 && (screen.width <= 600 || screen.height <= 600)) {
+                if (screen.height <= 550) {
                     document.querySelector('.photo-head').classList.add('unfixed');
+                }
+                if (screen.width > 600) {
                     const j = resultObj.gallery[0].length / 3;
                     for (let i = 0; i < resultObj.gallery[0].length; i += j)
                         results.push(resultObj.gallery[0].slice(i, i + j));
@@ -62,8 +64,8 @@
             }
             this.gallery = resultObj.gallery;
             new Blazy({
-                            offset: -200
-                        });
+                offset: -200
+            });
             riot.update();
         }
         window.addEventListener('orientationchange', doOnOrientationChange);
