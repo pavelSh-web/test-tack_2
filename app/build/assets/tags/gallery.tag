@@ -31,7 +31,7 @@
         clientId + '&query='; 
 
         //Добавление класса, отменяющего 'position: fixed' у элемента .photo-head
-        if (screen.width > 600 && (screen.width <= 600 || screen.height <= 600)) {
+        if (screen.height <= 600) {
             document.querySelector('.photo-head').classList.add('unfixed');
         }
 
