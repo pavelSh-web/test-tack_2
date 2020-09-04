@@ -38,6 +38,7 @@ body {
 }
 
 .photo {
+    transition: opacity 0.4s ease;
     &-head {
         padding: 100px 0 50px;
         position: fixed;
@@ -47,7 +48,7 @@ body {
         transform: translate(-50%);
         background: #E4E4E4;
         text-align: center;
-        z-index: 10000;
+        z-index: 1000;
     }
 
     &-head.unfixed {
@@ -83,6 +84,42 @@ body {
         max-width: 530px;
         margin: 0 auto;
     }
+
+    &-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: 0;
+        z-index: 2000;
+        background-color: rgba($color: #000000, $alpha: 0.3);
+        transition: transform 0.4s;
+        &__image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            max-width: 95%;
+            max-height: 95%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        }
+    }
+    &-modal::after {
+        content: 'Кликните для закрытия';
+        display: block;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        padding: 0.25em;
+        border-radius: 0.25em;
+        background: #E4E4E4;
+        position: absolute;
+        bottom: 0.5em;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 }
 
 
@@ -103,8 +140,8 @@ body {
     }
 
     &-item {
+        cursor: pointer;
         margin: 30px 15px;
-        
         &_xs {
             height: 188px;
         }
@@ -330,6 +367,38 @@ body {
   -webkit-animation-name: fadeInDown;
   animation-name: fadeInDown;
   animation-duration: 2s;
+}
+
+@-webkit-keyframes fadeInDown_m {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -100%, 0);
+    transform: translate3d(0, -100%, 0);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes fadeInDown_m {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(-50%, -100%, 0);
+    transform: translate3d(-50%, -100%, 0);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: translate3d(-50%, -50%, 0);
+    transform: translate3d(-50%, -50%, 0);
+  }
+}
+.animate__fadeInDown_m {
+  -webkit-animation-name: fadeInDown_m;
+  animation-name: fadeInDown_m;
+  animation-duration: 0.8s;
 }
 
 

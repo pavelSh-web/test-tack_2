@@ -3,7 +3,7 @@
         <div class="gallery-inner">
             <div class="gallery-column" each={column in gallery}>
                 <div class="gallery-item gallery-item_{size}" style="background: {color}" each={column}>
-                    <img class="b-lazy" data-src={src} alt="">
+                    <img class="b-lazy" data-src={src} data-color="{color}" alt="">
                 </div>
             </div>
         </div>
@@ -67,13 +67,17 @@
                 offset: -200
             });
             riot.update();
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                item.addEventListener('click', onClickPhoto);
+            })
         }
         window.addEventListener('orientationchange', doOnOrientationChange);
-        
 
 
         //Функция запрашивает фотографии и формирует их в сетку
         const getPhoto = (url) => {
+            
+
             //Шаблон сетки
             let gridArr = [
                 [{ size: "xs" }, { size: "s" }, { size: "l" }],
@@ -154,6 +158,10 @@
 
                         window.addEventListener('scroll', listenerScroll);
 
+                        document.querySelectorAll('.gallery-item').forEach(item => {
+                            item.addEventListener('click', onClickPhoto);
+                        })
+                        
                         //Отключаем лоадер
                         tagElem.classList.remove('loading');
                         //Запускаем ленивую загрузку
@@ -169,7 +177,7 @@
         getPhoto(url);
 
         //Функция добавляет верхний отступ у gallery
-        function addMargin() {
+        const addMargin = () => {
             function elementSize(selector) {
                 const element = document.querySelector(selector);
                 return element.clientHeight;
@@ -179,6 +187,7 @@
         addMargin();
         window.addEventListener('resize', () => addMargin())
 
+        //Прослушивание скролла и запрос новых фотографий за 10px до конца страницы
         const listenerScroll = () => {
             const clientHeight = document.documentElement.clientHeight ? document.documentElement.clientHeight : document.body.clientHeight;
             const documentHeight = document.documentElement.scrollHeight ? document.documentElement.scrollHeight : document.body.scrollHeight;
@@ -186,10 +195,52 @@
 
             if((documentHeight - clientHeight) <= scrollTop + 100) {
                 window.removeEventListener('scroll', listenerScroll);
-                console.log('end')
                 getPhoto(url);
             }
         }
+        
+        //Фунуция выполняется при клике на фото
+        const onClickPhoto = (e) => {
+            //Создаем модальное окно
+            const target = e.target;
+            const src = (target.dataset.src || target.src);
+            const result = `<img class="photo-modal__image animate__fadeInDown_m" src="${src}" alt=""> `
+            const newElem = document.createElement("div");
+            newElem.classList.add('photo-modal');
+            newElem.style.backgroundColor = `${target.dataset.color}4D`;
+
+            const wrap = document.body.appendChild(newElem);
+            wrap.innerHTML = result;
+            
+            //Фиксируем скролл и убираем дерганье body
+            document.body.style.paddingRight = `${calcScroll()}px`;
+            document.body.style.overflow = 'hidden';
+            document.querySelector('.photo').style.opacity = '0';
+
+            //Удаление модального окна при клике на него
+            document.querySelector('.photo-modal').addEventListener('click', removeModal);
+        }
+
+        function removeModal() {
+            this.remove();
+            document.body.style.overflow = 'scroll';
+            document.body.style.paddingRight = '0';
+            document.querySelector('.photo').style.opacity = '1';
+        }
+
+        //Расчет ширины скролл-бара
+        const calcScroll = () => {
+            let div = document.createElement('div');
+            div.style.width = '50px';
+            div.style.height = '50px';
+            div.style.overflowY = 'scroll';
+            div.style.visibility = 'hidden';
+            document.body.appendChild(div);
+            let scrollWidth = div.offsetWidth - div.clientWidth;
+            div.remove();
+
+            return scrollWidth;
+        }        
 
         //Отслеживание конца страницы и отправка нового запроса
         window.addEventListener('scroll', listenerScroll);
