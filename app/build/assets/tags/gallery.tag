@@ -151,7 +151,9 @@
                         }
                     
                         riot.update();
-                        
+
+                        window.addEventListener('scroll', listenerScroll);
+
                         //Отключаем лоадер
                         tagElem.classList.remove('loading');
                         //Запускаем ленивую загрузку
@@ -177,17 +179,19 @@
         addMargin();
         window.addEventListener('resize', () => addMargin())
 
-
-
-        //Отслеживание конца страницы и отправка нового запроса
-        window.addEventListener('scroll',() => {
+        const listenerScroll = () => {
             const clientHeight = document.documentElement.clientHeight ? document.documentElement.clientHeight : document.body.clientHeight;
             const documentHeight = document.documentElement.scrollHeight ? document.documentElement.scrollHeight : document.body.scrollHeight;
             const scrollTop = window.pageYOffset ? window.pageYOffset : (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
 
-            if((documentHeight - clientHeight) <= scrollTop) {
+            if((documentHeight - clientHeight) <= scrollTop + 100) {
+                window.removeEventListener('scroll', listenerScroll);
+                console.log('end')
                 getPhoto(url);
             }
-        });
+        }
+
+        //Отслеживание конца страницы и отправка нового запроса
+        window.addEventListener('scroll', listenerScroll);
     </script>
 </gallery>
