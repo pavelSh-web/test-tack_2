@@ -2,7 +2,7 @@
     <div class="container">
         <div class="gallery-inner">
             <div class="gallery-column" each={column in gallery}>
-                <div class="gallery-item gallery-item_{size}" style="background: {color}" each={column}>
+                <div class="gallery-item gallery-item_{size} added" style="background: {color}" each={column}>
                     <img class="b-lazy" data-src={src} data-color="{color}" alt="">
                 </div>
             </div>
@@ -157,10 +157,10 @@
                         riot.update();
 
                         window.addEventListener('scroll', listenerScroll);
-
-                        document.querySelectorAll('.gallery-item').forEach(item => {
+                        document.querySelectorAll('.gallery-item.added').forEach(item => {
+                            item.classList.remove('added');
                             item.addEventListener('click', onClickPhoto);
-                        })
+                        });
                         
                         //Отключаем лоадер
                         tagElem.classList.remove('loading');
