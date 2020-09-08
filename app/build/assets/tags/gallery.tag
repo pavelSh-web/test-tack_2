@@ -1,27 +1,19 @@
 <gallery class="gallery animate__fadeInUp">
     <div class="container">
         <div class="gallery-inner">
-            <div class="gallery-column" each={column in gallery}>
-                <div class="gallery-item gallery-item_{size} added" style="background: {color}" each={column}>
-                    <img class="b-lazy" data-src={src} data-color="{color}" alt="">
-                </div>
+            <div class="gallery-item gallery-item_{size} added" style="background: {color}" each={gallery}>
+                <img class="gallery-image b-lazy" data-src={src} data-color="{color}" alt="">
             </div>
         </div>
     </div>
+    <div class="loading" if = {showLoading}></div>
     <script>
 
         //Стартовый шаблон основной сетки
-        let resultObj = {};
-        if (document.body.clientWidth <= 600) {
-            resultObj = {
-                gallery: [[]]
-            }
-        } else {
-            resultObj = {
-                gallery: [[], [], []]
-            }
-        }
-        this.gallery = resultObj.gallery;
+        let resultObj = {
+            gallery: []
+        };
+        
 
         const tagElem = this.root;
         //url запроса
@@ -37,41 +29,17 @@
 
         //Функция изменений при повороте тач-устройства
         const doOnOrientationChange = () => {
-            const results = [];
             if (window.orientation == -90 || window.orientation == 90) {
                 if (screen.height <= 550) {
                     document.querySelector('.photo-head').classList.add('unfixed');
-                }
-                if (screen.width > 600) {
-                    const j = resultObj.gallery[0].length / 3;
-                    for (let i = 0; i < resultObj.gallery[0].length; i += j)
-                        results.push(resultObj.gallery[0].slice(i, i + j));
-                    resultObj.gallery = results;
                 } else {
                     document.querySelector('.photo-head').classList.remove('unfixed');
                 }
             } else {
                 document.querySelector('.photo-head').classList.remove('unfixed');
-                if (screen.width <= 600) {
-                    resultObj.gallery.forEach(arr => {
-                        arr.forEach(item => {
-                            results.push(item)
-                        })
-                    });
-                    resultObj.gallery = [];
-                    resultObj.gallery[0] = results;
-                }
             }
-            this.gallery = resultObj.gallery;
-            new Blazy({
-                offset: -200
-            });
-            riot.update();
-            document.querySelectorAll('.gallery-item').forEach(item => {
-                item.addEventListener('click', onClickPhoto);
-            })
         }
-        window.addEventListener('orientationchange', doOnOrientationChange);
+        window.addEventListener('orientationchange', doOnOrientationChange); 
 
 
         //Функция запрашивает фотографии и формирует их в сетку
@@ -80,8 +48,8 @@
 
             //Шаблон сетки
             let gridArr = [
-                [{ size: "xs" }, { size: "s" }, { size: "l" }],
-                [{ size: "s" }, { size: "l" }, { size: "xs" }],
+                [{ size: "xs" }, { size: "s" }, { size: "m" }],
+                [{ size: "m" }, { size: "l" }, { size: "xs" }],
                 [{ size: "l" }, { size: "xs" }, { size: "s" }],
             ];
 
@@ -89,8 +57,8 @@
             url += query[Math.floor(Math.random() * query.length)];
             
             //Запускаем лоадер
-            tagElem.classList.add('loading');
-
+            this.showLoading = true;
+            riot.update();
             
             fetch(url)  
                 .then((response) => {
@@ -103,67 +71,27 @@
 
                     response.json().then((data) => {
                         //Счетчик для фотографий
-                        let count = 0;
+                        let count = 0;                   
 
-                        //Массив для предварительного заполнения
-                        let fillGrid = [];
-
-                        if (document.body.clientWidth <= 600) {
-
-                            resultObj.gallery.forEach(gridCol => {
-                                for ( let i = 0; i < 3; i++) {
-                                    //Рандомный индекс для gridArr
-                                    const randomI = Math.floor(Math.random() * gridArr.length);
-                                    //Заполнение каждого элемента столбца
-                                    for( let j = 0; j < 3; j++ ) {
-                                        gridArr[randomI][j].src = data.results[count].urls.regular;
-                                        gridArr[randomI][j].color = data.results[count].color;
-                                        count++
-                                    }
-                                    fillGrid = fillGrid.concat(gridArr[randomI]);
-                                    gridArr.splice(randomI, 1);
-                                }
-
-                                //Заполняем текущую колонку
-                                fillGrid.forEach((item) => {
-                                    gridCol.push(item);
-                                });
-                            });
-                           
-                        } else {
-
-                            resultObj.gallery.forEach((gridCol) => {
-                                //Рандомный столбец сетки
-                                const randomI = Math.floor(Math.random() * gridArr.length)
-                                
-                                fillGrid = gridArr[randomI];
-                                gridArr.splice(randomI, 1);
-
-                                //Заполнение каждого элемента столбца
-                                for( let j = 0; j < 3; j++ ) {
-                                    fillGrid[j].src = data.results[count].urls.regular;
-                                    fillGrid[j].color = data.results[count].color;
-                                    count++
-                                }
-
-                                //Заполняем колонку
-                                fillGrid.forEach((item) => {
-                                    gridCol.push(item);
-                                });
-                            });
-                            
+                        for ( let i = 0; i < 3; i++) {
+                            //Рандомный индекс для gridArr
+                            const randomI = Math.floor(Math.random() * gridArr.length);
+                            //Заполнение каждого элемента столбца
+                            for( let j = 0; j < 3; j++ ) {
+                                gridArr[randomI][j].src = data.results[count].urls.regular;
+                                gridArr[randomI][j].color = data.results[count].color;
+                                count++
+                            }
+                            resultObj.gallery = resultObj.gallery.concat(gridArr[randomI]);
+                            console.log(this.gallery);
+                            gridArr.splice(randomI, 1);
                         }
-                    
-                        riot.update();
-
-                        window.addEventListener('scroll', listenerScroll);
-                        document.querySelectorAll('.gallery-item.added').forEach(item => {
-                            item.classList.remove('added');
-                            item.addEventListener('click', onClickPhoto);
-                        });
-                        
+                        this.gallery = resultObj.gallery;
                         //Отключаем лоадер
-                        tagElem.classList.remove('loading');
+                        this.showLoading = false;
+                        riot.update();
+                        
+                        window.addEventListener('scroll', listenerScroll);
                         //Запускаем ленивую загрузку
                         new Blazy({
                             offset: -200
@@ -193,40 +121,54 @@
             const documentHeight = document.documentElement.scrollHeight ? document.documentElement.scrollHeight : document.body.scrollHeight;
             const scrollTop = window.pageYOffset ? window.pageYOffset : (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
 
-            if((documentHeight - clientHeight) <= scrollTop + 100) {
+            if((documentHeight - clientHeight) <= scrollTop + 200) {
                 window.removeEventListener('scroll', listenerScroll);
                 getPhoto(url);
             }
         }
-        
-        //Фунуция выполняется при клике на фото
-        const onClickPhoto = (e) => {
-            //Создаем модальное окно
-            const target = e.target;
-            const src = (target.dataset.src || target.src);
-            const result = `<img class="photo-modal__image animate__fadeInDown_m" src="${src}" alt=""> `
-            const newElem = document.createElement("div");
-            newElem.classList.add('photo-modal');
-            newElem.style.backgroundColor = `${target.dataset.color}4D`;
 
-            const wrap = document.body.appendChild(newElem);
-            wrap.innerHTML = result;
-            
-            //Фиксируем скролл и убираем дерганье body
-            document.body.style.paddingRight = `${calcScroll()}px`;
-            document.body.style.overflow = 'hidden';
-            document.querySelector('.photo').style.opacity = '0';
-
-            //Удаление модального окна при клике на него
-            document.querySelector('.photo-modal').addEventListener('click', removeModal);
-        }
-
+        //Функция скрытия модального окна
         function removeModal() {
             this.remove();
             document.body.style.overflow = 'scroll';
             document.body.style.paddingRight = '0';
             document.querySelector('.photo').style.opacity = '1';
         }
+        
+        //Фунуция выполняется при клике на фото
+        const onClickPhoto = (e) => {
+            //Создаем модальное окно
+            const target = e.target;
+            if (target.classList.contains('gallery-image')) {
+                const src = (target.dataset.src || target.src);
+                const result = `<img class="photo-modal__image animate__fadeInDown_m" src="${src}" alt=""> `
+                const newElem = document.createElement("div");
+                newElem.classList.add('photo-modal');
+                newElem.style.backgroundColor = `${target.dataset.color}4D`;
+
+                const wrap = document.body.appendChild(newElem);
+                wrap.innerHTML = result;
+                
+                //Фиксируем скролл и убираем дерганье body
+                document.body.style.paddingRight = `${calcScroll()}px`;
+                document.body.style.overflow = 'hidden';
+                document.querySelector('.photo').style.opacity = '0';
+            }
+            
+            //Удаление модального окна при клике на него
+            document.querySelector('.photo-modal').addEventListener('click', removeModal);
+        }
+
+        //Запуск слушателя на клик
+        let updateCount = 0;
+        this.on("update", () => {
+            if (updateCount === 0) {
+                console.log('add listener')
+                document.querySelector('.gallery-inner').addEventListener('click', onClickPhoto);
+            }
+            updateCount++;
+        });
+
 
         //Расчет ширины скролл-бара
         const calcScroll = () => {
@@ -244,5 +186,6 @@
 
         //Отслеживание конца страницы и отправка нового запроса
         window.addEventListener('scroll', listenerScroll);
+
     </script>
 </gallery>
