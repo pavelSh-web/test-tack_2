@@ -83,7 +83,6 @@
                                 count++
                             }
                             resultObj.gallery = resultObj.gallery.concat(gridArr[randomI]);
-                            console.log(this.gallery);
                             gridArr.splice(randomI, 1);
                         }
                         this.gallery = resultObj.gallery;
@@ -163,7 +162,6 @@
         let updateCount = 0;
         this.on("update", () => {
             if (updateCount === 0) {
-                console.log('add listener')
                 document.querySelector('.gallery-inner').addEventListener('click', onClickPhoto);
             }
             updateCount++;
